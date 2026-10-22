@@ -20,21 +20,20 @@ where \(r\) is the continuously compounded risk-free rate, \(q\) is the continuo
 
 The upper and lower option values are obtained by maximizing or minimizing the discounted expected payoff over admissible volatility processes.
 
-Writing \(\tau=T-t\) for time to maturity, the corresponding Black–Scholes–Barenblatt PDE is
+Writing $\tau = T-t$ for time to maturity, the corresponding Black–Scholes–Barenblatt PDE is
 
 ```math
 \frac{\partial V}{\partial \tau}
 =
-\underset{\sigma\in[\sigma_{\min},\sigma_{\max}]}{\operatorname{ext}}
-\left[
-\frac{1}{2}\sigma^2S^2
-\frac{\partial^2 V}{\partial S^2}
-+(r-q)S\frac{\partial V}{\partial S}
--rV
-\right],
+\sup_{\sigma \in [\sigma_{\min},\sigma_{\max}]}
+\left(
+\frac{1}{2}\sigma^2 S^2 \frac{\partial^2 V}{\partial S^2}
++ (r-q)S\frac{\partial V}{\partial S}
+- rV
+\right)
 ```
 
-where \(\operatorname{ext}\) denotes a supremum for the upper valuation bound and an infimum for the lower valuation bound.
+The equation above describes the upper valuation bound, obtained by taking the supremum over admissible volatilities. The lower valuation bound is obtained by replacing the supremum with an infimum.
 
 ### Gamma-Dependent Volatility Selection
 
@@ -74,14 +73,14 @@ The resulting spatial operator has a tridiagonal structure.
 
 ### Implicit Time Stepping
 
-With \(\Delta\tau=T/N\), the fully implicit discretization takes the form
+With $\Delta\tau = T/N$, the fully implicit discretization takes the form
 
 ```math
 \left(I-\Delta\tau L_{\sigma^*}\right)
 V^{n+1}=V^n,
 ```
 
-where \(L_{\sigma^*}\) is the discrete Black–Scholes operator evaluated under the selected volatility policy.
+where $L_{\sigma^*}$ is the discrete Black–Scholes operator evaluated under the selected volatility policy.
 
 The implicit scheme provides first-order temporal accuracy, while the interior spatial discretization is second-order accurate for sufficiently smooth solutions.
 
@@ -113,18 +112,18 @@ C(S,T)=(S-K)^+,
 P(S,T)=(K-S)^+.
 ```
 
-For these convex payoffs, the upper and lower uncertain-volatility valuations recover the Black–Scholes prices at \(\sigma_{\max}\) and \(\sigma_{\min}\), respectively.
+For these convex payoffs, the upper and lower uncertain-volatility valuations recover the Black–Scholes prices at $\sigma_{\max}$ and $\sigma_{\min}$, respectively.
 
 ### Cash-or-Nothing Digital Options
 
 European digital calls and puts with terminal payoffs
 
 ```math
-D_{\mathrm{call}}(S,T)
-=R\,\mathbf{1}_{\{S\geq K\}},
-\qquad
-D_{\mathrm{put}}(S,T)
-=R\,\mathbf{1}_{\{S<K\}}.
+D_{\text{call}}(S,T) = R \mathbb{1}_{S \ge K}
+```
+
+```math
+D_{\text{put}}(S,T) = R \mathbb{1}_{S < K}
 ```
 
 Both discontinuous digital payoffs and optionally smoothed payoffs are supported.
@@ -171,8 +170,6 @@ The implementation is validated using automated tests covering:
 - Absorbing and rebate boundary conditions.
 - Upper and lower uncertain-volatility valuation ordering.
 - Barrier monotonicity and numerical grid refinement.
-
-The current automated validation suite contains **63 passing tests**.
 
 ## References
 

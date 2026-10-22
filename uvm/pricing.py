@@ -197,16 +197,23 @@ def price_barrier(
     option="call",
     direction="up-and-out",
     bound="upper",
-    spot=None
+    spot=None,
+    rebate=0.0,
 ):
     """
-    Price a continuously monitored, zero-rebate knock-out option.
+    Price a continuously monitored knock-out option with an
+    immediate-payment rebate upon hitting the barrier.
 
     The stock grid must include the barrier as its relevant endpoint:
         up-and-out:   spot_grid[-1] == barrier
         down-and-out: spot_grid[0]  == barrier
 
-    Returns option values at every grid node.
+    rebate:
+        Cash amount paid immediately when the barrier is hit.
+        Default is zero.
+
+    Returns the full value grid if spot is None;
+    otherwise returns the interpolated price at spot.
     """
 
     _validate_option(option)
@@ -214,6 +221,9 @@ def price_barrier(
 
     if direction not in ("up-and-out", "down-and-out"):
         raise ValueError("Unsupported barrier direction.")
+
+    if rebate < 0:
+        raise ValueError("rebate must be nonnegative.")
 
     if direction == "up-and-out":
         if not np.isclose(spot_grid[-1], barrier):
@@ -232,7 +242,8 @@ def price_barrier(
         else:
             lower_value = None
 
-        upper_value = 0.0
+        # Immediate rebate at the upper barrier.
+        upper_value = rebate
 
     else:
         if not np.isclose(spot_grid[0], barrier):
@@ -243,7 +254,8 @@ def price_barrier(
         lower_bc = "dirichlet"
         upper_bc = "dirichlet"
 
-        lower_value = 0.0
+        # Immediate rebate at the lower barrier.
+        lower_value = rebate
 
         upper_value = (
             lambda tau: (
@@ -256,11 +268,11 @@ def price_barrier(
 
     payoff = _payoff(spot_grid, strike, option)
 
-    # Enforce knock-out at maturity as well.
+    # Apply the rebate at the knock-out boundary at maturity.
     if direction == "up-and-out":
-        payoff[-1] = 0.0
+        payoff[-1] = rebate
     else:
-        payoff[0] = 0.0
+        payoff[0] = rebate
 
     values = solve_uvm(
         spot_grid=spot_grid,
@@ -277,11 +289,11 @@ def price_barrier(
         lower_value=lower_value,
         upper_value=upper_value,
     )
-    
+
     if spot is None:
         return values
-    
+
     if not spot_grid[0] <= spot <= spot_grid[-1]:
         raise ValueError("spot must lie within spot_grid.")
-    
+
     return np.interp(spot, spot_grid, values)
